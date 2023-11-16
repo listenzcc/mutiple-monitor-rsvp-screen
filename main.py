@@ -19,6 +19,8 @@ Functions:
 # %% ---- 2023-11-16 ------------------------
 # Requirements and constants
 from util import LOGGER
+from util.rsvp_images import RSVPImages
+from util.rsvp_monitor import RSVPMonitor
 
 
 # %% ---- 2023-11-16 ------------------------
@@ -28,7 +30,11 @@ from util import LOGGER
 # %% ---- 2023-11-16 ------------------------
 # Play ground
 if __name__ == '__main__':
-    LOGGER.debug('Debug')
+    monitor = RSVPMonitor()
+    rsvp_images = RSVPImages()
+    rsvp_images.report()
+    block = rsvp_images.new_block()
+    monitor.display_rsvp_block(block)
 
 
 # %% ---- 2023-11-16 ------------------------

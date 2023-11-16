@@ -18,18 +18,13 @@ Functions:
 
 # %% ---- 2023-11-16 ------------------------
 # Requirements and constants
-import cv2
-import time
-
-from PIL import Image
-from threading import Thread
-from omegaconf import OmegaConf
-from dataclasses import dataclass
+from loguru import logger
 
 from pathlib import Path
-from loguru import logger as LOGGER
 from datetime import datetime
-from rich import print, inspect
+from omegaconf import OmegaConf
+
+from dataclasses import dataclass
 
 
 # %% ---- 2023-11-16 ------------------------
@@ -38,18 +33,44 @@ root = Path(__file__).parent.parent
 
 
 @dataclass
-class Project:
-    root: Path = root
+class CustomOverride:
+    version: str = '0.0'
 
 
-CONF = OmegaConf.structured(Project)
-print(CONF)
+@dataclass
+class Runtime(CustomOverride):
+    root_path: Path = root
+
+
+def init_logger():
+    now = datetime.now()  # current date and time
+    date_time = now.strftime("%Y-%m-%d-%H-%M-%S")
+    logger.add(root.joinpath(f'log/{date_time}.log'))
+    return logger
+
+
+LOGGER = init_logger()
+
+
+def init_conf():
+    p = root.joinpath('custom/custom.json')
+    if p.is_file():
+        custom = OmegaConf.load(p)
+    else:
+        custom = OmegaConf.structured(CustomOverride)
+
+    runtime = OmegaConf.structured(Runtime)
+    CONF = OmegaConf.merge(custom, runtime)
+
+    OmegaConf.save(CONF, root.joinpath('latest.yaml'))
+
+    return CONF
+
 
 # %% ---- 2023-11-16 ------------------------
 # Play ground
-now = datetime.now()  # current date and time
-date_time = now.strftime("%Y-%m-%d-%H-%M-%S")
-LOGGER.add(root.joinpath(f'log/{date_time}.log'))
+CONF = init_conf()
+LOGGER.debug(f'Started with {CONF}')
 
 
 # %% ---- 2023-11-16 ------------------------

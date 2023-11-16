@@ -1,0 +1,18 @@
+{
+  "version": 0.0,
+  "targets_folder": "C:\\Users\\zcc\\OneDrive\\Pictures\\DesktopPictures",
+  "others_folder": "C:\\Users\\zcc\\Pictures\\snipaste",
+  "width": 800,
+  "height": 600,
+  "rsvp_fps": 10,
+  "rsvp_block_total_images": 100,
+  "rsvp_block_targets": 8,
+  "rsvp_block_targets_min_gap": 5,
+  "rsvp_between_blocks_secs": 5,
+  "rsvp_wnd_name": "RSVP Wnd",
+  "signal_rsvp_block_start": 16,
+  "signal_rsvp_block_stop": 32,
+  "signal_target_onset": 2,
+  "signal_other_onset": 4,
+  "signal_subject_keydown": 8
+}
