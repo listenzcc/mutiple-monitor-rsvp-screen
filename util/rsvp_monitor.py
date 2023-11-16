@@ -67,6 +67,10 @@ class RSVPMonitor(object):
             cv2.imshow(self.winname, mat)
             cv2.pollKey()
 
+            if obj[0] == 'target':
+                cv2.imshow('Target', mat)
+                cv2.pollKey()
+
             i += 1
 
         toc = time.time()

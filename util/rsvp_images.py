@@ -84,12 +84,10 @@ def _mk_rsvp_block_design():
     assert valid_flag, f'Invalid rsvp block setup, {(n, k, m)}'
 
     res = []
-    for i in range(k):
-        for _ in range(m):
-            res.append(0)
+    for _ in range(k):
+        res.extend(0 for _ in range(m))
         res.append(1)
-    for _ in range(m):
-        res.append(0)
+    res.extend(0 for _ in range(m))
 
     while len(res) < n:
         i = np.random.randint(0, len(res))
@@ -103,7 +101,6 @@ def _mk_rsvp_block_design():
 class RSVPImages(object):
     def __init__(self):
         self.load()
-        pass
 
     def report(self):
         grp = self.table.groupby('type')
@@ -134,22 +131,22 @@ class RSVPImages(object):
         self.other_idx = 0
         np.random.shuffle(self.targets)
         np.random.shuffle(self.others)
-        LOGGER.debug(f'Shuffled images')
+        LOGGER.debug('Shuffled images')
 
     def get_target(self):
         output = self.targets[self.target_idx]
         self.target_idx += 1
         if self.target_idx >= len(self.targets):
-            LOGGER.warning(f'Target images are exceeded, re-start from 0')
             self.target_idx = 0
+            LOGGER.warning('Target images are exceeded, re-start from 0')
         return output
 
     def get_other(self):
         output = self.others[self.other_idx]
         self.other_idx += 1
         if self.other_idx >= len(self.others):
-            LOGGER.warning(f'Other images are exceeded, re-start from 0')
             self.other_idx = 0
+            LOGGER.warning('Other images are exceeded, re-start from 0')
         return output
 
     def new_block(self):
