@@ -14,5 +14,6 @@
   "signal_rsvp_block_stop": 32,
   "signal_target_onset": 2,
   "signal_other_onset": 4,
-  "signal_subject_keydown": 8
+  "signal_subject_keydown": 8,
+  "parallel_port": 8848
 }

@@ -1,5 +1,5 @@
 """
-File: main.py
+File: messager.py
 Author: Chuncheng Zhang
 Date: 2023-11-16
 Copyright & Email: chuncheng.zhang@ia.ac.cn
@@ -18,23 +18,27 @@ Functions:
 
 # %% ---- 2023-11-16 ------------------------
 # Requirements and constants
-import time
-from util import LOGGER
-from util.web_controller import demo
+from threading import Thread
 
-from util.worker import Worker
+from . import LOGGER, CONF, singleton
 
 
 # %% ---- 2023-11-16 ------------------------
 # Function and class
 
+@singleton
+class MessageBox(object):
+    port = CONF.parallel_port
+
+    def __init__(self):
+        LOGGER.debug(f'Initialized with parallel port: {self.port}')
+
+    def send_parallel_code(self, code: int):
+        LOGGER.debug(f'Sent code to parallel port: {code}')
+
 
 # %% ---- 2023-11-16 ------------------------
 # Play ground
-if __name__ == '__main__':
-    demo.launch()
-
-    print('Bye')
 
 
 # %% ---- 2023-11-16 ------------------------

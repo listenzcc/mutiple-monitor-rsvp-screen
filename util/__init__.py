@@ -67,6 +67,16 @@ def init_conf():
     return CONF
 
 
+def singleton(cls, *args, **kw):
+    instances = {}
+
+    def _singleton(*args, **kw):
+        if cls not in instances:
+            instances[cls] = cls(*args, **kw)
+        return instances[cls]
+    return _singleton
+
+
 # %% ---- 2023-11-16 ------------------------
 # Play ground
 CONF = init_conf()

@@ -1,5 +1,5 @@
 """
-File: main.py
+File: web_controller.py
 Author: Chuncheng Zhang
 Date: 2023-11-16
 Copyright & Email: chuncheng.zhang@ia.ac.cn
@@ -18,23 +18,35 @@ Functions:
 
 # %% ---- 2023-11-16 ------------------------
 # Requirements and constants
-import time
-from util import LOGGER
-from util.web_controller import demo
+import pandas as pd
+import gradio as gr
 
-from util.worker import Worker
+from .worker import Worker
+from . import LOGGER, CONF
 
+worker = Worker()
 
 # %% ---- 2023-11-16 ------------------------
 # Function and class
 
 
+def image_classifier(inp):
+    print(inp)
+    block = worker.start_new_block()
+    df = gr.Dataframe(
+        value=[(j,) + e[:2] for j, e in enumerate(block)],
+        headers=['idx', "type", "name"],
+        datatype=['number', 'str', 'str'],
+        col_count=(3, "fixed"),
+    )
+    return df
+
+
+demo = gr.Interface(fn=image_classifier, inputs="image", outputs="dataframe")
+# demo.launch()
+
 # %% ---- 2023-11-16 ------------------------
 # Play ground
-if __name__ == '__main__':
-    demo.launch()
-
-    print('Bye')
 
 
 # %% ---- 2023-11-16 ------------------------

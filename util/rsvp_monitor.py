@@ -22,14 +22,19 @@ import cv2
 import time
 import numpy as np
 
-from . import LOGGER, CONF
+from threading import Thread
+
+from . import LOGGER, CONF, singleton
+from .messager import MessageBox
 
 
 # %% ---- 2023-11-16 ------------------------
 # Function and class
+@singleton
 class RSVPMonitor(object):
     winname = str(CONF.rsvp_wnd_name)
     fps = int(CONF.rsvp_fps)
+    mb = MessageBox()
 
     def __init__(self):
         pass
@@ -39,12 +44,15 @@ class RSVPMonitor(object):
         return 1 / self.fps
 
     def display_rsvp_block(self, block):
+        cv2.namedWindow("Target", cv2.WINDOW_NORMAL)
+        cv2.namedWindow(self.winname, cv2.WINDOW_NORMAL)
+
         n = len(block)
 
         dt = self.update_fps()
         next_t = dt
 
-        # times = np.linspace(0, n/self.fps, n, endpoint=False)
+        self.mb.send_parallel_code(CONF.signal_rsvp_block_start)
 
         tic = time.time()
 
@@ -56,13 +64,14 @@ class RSVPMonitor(object):
                 time.sleep(0.001)
                 continue
 
-            print(f'Image onset: {i} | {t:0.4f}')
-
             dt = self.update_fps()
             next_t = t + dt - t % dt
 
             obj = block[i]
+            img = obj[2]
             mat = obj[3]
+
+            print(f'Image onset: {i} | {t:0.4f} | {mat.shape}')
 
             cv2.imshow(self.winname, mat)
             cv2.pollKey()
@@ -70,13 +79,19 @@ class RSVPMonitor(object):
             if obj[0] == 'target':
                 cv2.imshow('Target', mat)
                 cv2.pollKey()
+                self.mb.send_parallel_code(CONF.signal_target_onset)
+            else:
+                self.mb.send_parallel_code(CONF.signal_other_onset)
 
             i += 1
+
+        self.mb.send_parallel_code(CONF.signal_rsvp_block_stop)
 
         toc = time.time()
         t = toc-tic
         r = t/n
         LOGGER.debug(f'Finished rsvp block: {r} | {t} | {n}')
+        cv2.destroyAllWindows()
 
 
 # %% ---- 2023-11-16 ------------------------
