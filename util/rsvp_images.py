@@ -18,6 +18,7 @@ Functions:
 
 # %% ---- 2023-11-16 ------------------------
 # Requirements and constants
+import cv2
 import time
 import numpy as np
 import pandas as pd
@@ -57,7 +58,7 @@ def _find_images(folder: Path, type: str = 'na'):
     res = []
     ts = []
 
-    for file in tqdm([e for e in folder.iterdir() if e.is_file()], 'Find images'):
+    for file in tqdm([e for e in folder.iterdir() if e.is_file()][:100], 'Find images'):
         t = Thread(target=_read, args=(file,), daemon=True)
         t.start()
         ts.append(t)
@@ -155,7 +156,8 @@ class RSVPImages(object):
         block = []
         for e in type_line:
             obj = self.get_target() if e == 1 else self.get_other()
-            mat = np.array(obj[-1], dtype=np.uint8)
+            mat = cv2.cvtColor(
+                np.array(obj[-1], dtype=np.uint8), cv2.COLOR_BGR2RGB)
             block.append(obj + (mat,))
         LOGGER.debug(f'Generated block: {[e[:2] for e in block]}')
         return block
