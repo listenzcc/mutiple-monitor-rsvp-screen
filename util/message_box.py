@@ -1,5 +1,5 @@
 """
-File: messager.py
+File: message_box.py
 Author: Chuncheng Zhang
 Date: 2023-11-16
 Copyright & Email: chuncheng.zhang@ia.ac.cn

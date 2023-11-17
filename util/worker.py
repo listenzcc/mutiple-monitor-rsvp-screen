@@ -47,7 +47,8 @@ class Worker(object):
         # self._running_block()
 
         block = self.rsvp_images.new_block()
-        Thread(target=self._running_block, args=(block,), daemon=True).start()
+        self.monitor.blocks.append(block)
+        # Thread(target=self._running_block, args=(block,), daemon=True).start()
 
         return block
 
