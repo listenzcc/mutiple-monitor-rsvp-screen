@@ -73,7 +73,11 @@ def singleton(cls, *args, **kw):
     def _singleton(*args, **kw):
         if cls not in instances:
             instances[cls] = cls(*args, **kw)
+        else:
+            LOGGER.debug(f'Using existing instance: {instances[cls]}')
+
         return instances[cls]
+
     return _singleton
 
 

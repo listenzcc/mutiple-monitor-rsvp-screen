@@ -32,6 +32,7 @@ from threading import Thread
 from rich import print, inspect
 
 from . import LOGGER, CONF
+from .img_tool import pil2mat
 
 # %% ---- 2023-11-16 ------------------------
 # Function and class
@@ -156,8 +157,7 @@ class RSVPImages(object):
         block = []
         for e in type_line:
             obj = self.get_target() if e == 1 else self.get_other()
-            mat = cv2.cvtColor(
-                np.array(obj[-1], dtype=np.uint8), cv2.COLOR_BGR2RGB)
+            mat = pil2mat(obj[-1])
             block.append(obj + (mat,))
         LOGGER.debug(f'Generated block: {[e[:2] for e in block]}')
         return block

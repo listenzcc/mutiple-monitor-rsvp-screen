@@ -21,6 +21,8 @@ Functions:
 import pandas as pd
 import gradio as gr
 
+from datetime import datetime
+
 from .worker import Worker
 from . import LOGGER, CONF
 
@@ -30,8 +32,11 @@ worker = Worker()
 # Function and class
 
 
-def image_classifier(inp):
-    print(inp)
+def _record(subject, experiment):
+    return f'Record: {subject}, {experiment}, {datetime.now()}'
+
+
+def _insert_block():
     block = worker.start_new_block()
     df = gr.Dataframe(
         value=[(j,) + e[:2] for j, e in enumerate(block)],
@@ -42,12 +47,32 @@ def image_classifier(inp):
     return df
 
 
-demo = gr.Interface(fn=image_classifier, inputs="image", outputs="dataframe")
-# demo.launch()
+def _rsvp_fps(fps):
+    CONF.rsvp_fps = fps
+    LOGGER.debug(f'Changed RSVP fps to {fps}')
 
 # %% ---- 2023-11-16 ------------------------
 # Play ground
 
+
+with gr.Blocks() as demo:
+    gr.Markdown('## Subject & experiment')
+    subject = gr.Textbox(label="Subject")
+    experiment = gr.Textbox(label="Experiment", lines=2)
+    record = gr.Textbox(value="", label='Record')
+    submit_btn = gr.Button(value="Submit")
+    submit_btn.click(_record, inputs=[subject, experiment], outputs=[record])
+
+    gr.Markdown('## RSVP control')
+    rsvp_fps_slider = gr.Slider(
+        1, 30, value=10, step=1, interactive=True, label='FPS', info="Choose between 1 to 30 Hz")
+    insert_block_btn = gr.Button(value="Insert block")
+    block_design = gr.Dataframe()
+    insert_block_btn.click(_insert_block, outputs=[block_design])
+    rsvp_fps_slider.input(_rsvp_fps, inputs=rsvp_fps_slider)
+
+
+demo.launch()
 
 # %% ---- 2023-11-16 ------------------------
 # Pending
