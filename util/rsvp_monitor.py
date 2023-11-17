@@ -101,9 +101,9 @@ class RSVPMonitor(object):
 
             print(f'Image onset: {i} | {t:0.4f} | {mat.shape}')
 
-            # winname | remain blocks | real fps
-            cv2.setWindowTitle(
-                self.winname, f'{self.winname} | Blocks: {len(self.blocks)} | Fps: {(i+1)/t:0.4f}')
+            # winname | remain blocks | real fps | ideal fps
+            cv2.setWindowTitle(self.winname,
+                               f'{self.winname} | Blocks: {len(self.blocks)} | Fps: {(i+1)/t:0.4f} | {CONF.rsvp_fps}')
             cv2.imshow(self.winname, mat)
             cv2.pollKey()
 
