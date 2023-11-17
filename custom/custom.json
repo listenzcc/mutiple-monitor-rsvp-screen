@@ -11,6 +11,7 @@
   "rsvp_between_blocks_secs": 2,
   "rsvp_wnd_name": "RSVP",
   "rsvp_target_wnd_name": "Target",
+  "terrain_wnd_name": "Terrain",
   "signal_rsvp_block_start": 16,
   "signal_rsvp_block_stop": 32,
   "signal_target_onset": 2,

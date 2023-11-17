@@ -25,6 +25,7 @@ from threading import Thread
 from . import LOGGER, singleton
 from .rsvp_images import RSVPImages
 from .rsvp_monitor import RSVPMonitor
+from .terrain_monitor import TerrainMonitor
 
 
 # %% ---- 2023-11-16 ------------------------
@@ -32,8 +33,9 @@ from .rsvp_monitor import RSVPMonitor
 
 @singleton
 class Worker(object):
-    monitor = RSVPMonitor()
+    rsvp_monitor = RSVPMonitor()
     rsvp_images = RSVPImages()
+    terrain_monitor = TerrainMonitor()
     busy = False
 
     def __init__(self):
@@ -47,7 +49,7 @@ class Worker(object):
         # self._running_block()
 
         block = self.rsvp_images.new_block()
-        self.monitor.blocks.append(block)
+        self.rsvp_monitor.blocks.append(block)
         # Thread(target=self._running_block, args=(block,), daemon=True).start()
 
         return block
@@ -57,7 +59,7 @@ class Worker(object):
         self.busy = True
         LOGGER.debug('Started running block')
 
-        self.monitor.display_rsvp_block(block)
+        self.rsvp_monitor.display_rsvp_block(block)
         cv2.waitKey(0)
 
         self.busy = False

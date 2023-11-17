@@ -39,6 +39,7 @@ class RSVPMonitor(object):
     mb = MessageBox()
     asset = Asset()
     blocks = []
+    dt = 0.001
 
     def __init__(self):
         Thread(target=self.loop, daemon=True).start()
@@ -62,8 +63,9 @@ class RSVPMonitor(object):
             cv2.imshow(self.winname, self.asset.image_rsvp_idle['mat'])
             cv2.imshow(self.winname_target, self.asset.image_rsvp_idle['mat'])
             cv2.pollKey()
-            time.sleep(0.001)
+            time.sleep(self.dt)
 
+            # There are RSVP blocks
             while self.blocks:
                 cv2.imshow(
                     self.winname, self.asset.image_rsvp_between_blocks['mat'])
@@ -89,14 +91,13 @@ class RSVPMonitor(object):
             t = time.time() - tic
 
             if (t < next_t):
-                time.sleep(0.001)
+                time.sleep(self.dt)
                 continue
 
             dt = self.update_fps()
             next_t = t + dt - t % dt
 
             obj = block[i]
-            img = obj[2]
             mat = obj[3]
 
             print(f'Image onset: {i} | {t:0.4f} | {mat.shape}')
