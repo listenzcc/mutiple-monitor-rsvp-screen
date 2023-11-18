@@ -77,6 +77,8 @@ class RSVPMonitor(object):
         cv2.destroyAllWindows()
 
     def display_rsvp_block(self, block):
+        self.mb.internal_message_rsvp_block_starts()
+
         n = len(block)
 
         dt = self.update_fps()
@@ -97,8 +99,8 @@ class RSVPMonitor(object):
             dt = self.update_fps()
             next_t = t + dt - t % dt
 
-            obj = block[i]
-            mat = obj[3]
+            dct = block[i]
+            mat = dct['mat_rgb']
 
             print(f'Image onset: {i} | {t:0.4f} | {mat.shape}')
 
@@ -108,12 +110,17 @@ class RSVPMonitor(object):
             cv2.imshow(self.winname, mat)
             cv2.pollKey()
 
-            if obj[0] == 'target':
+            # ! Main switch between the onset image is target or not
+            if dct['img_type'] == 'target':
                 # winname_target | latest target file name
                 cv2.setWindowTitle(self.winname_target,
-                                   f'{self.winname_target} | Name: {obj[1]}')
+                                   f'{self.winname_target} | Name: {dct["img_name"]}')
                 cv2.imshow(self.winname_target, mat)
                 cv2.pollKey()
+
+                self.mb.internal_message_rsvp_target_onset(
+                    dct['img_name'], dct['thumbnail'])
+
                 self.mb.send_parallel_code(CONF.signal_target_onset)
             else:
                 self.mb.send_parallel_code(CONF.signal_other_onset)

@@ -29,7 +29,14 @@ def pil2mat(img: Image, code=cv2.COLOR_BGR2RGB):
     return cv2.cvtColor(np.array(img, dtype=np.uint8), code)
 
 
-def overlay(background: np.array, foreground: np.array, foreground_map: np.array, x: float, y: float, copy=True):
+def overlay(background: np.array,
+            foreground: np.array,
+            foreground_map: np.array = None,
+            x: float = 0.5,
+            y: float = 0.5,
+            alpha: float = 0.8,
+            copy: bool = True):
+
     if copy:
         background = background.copy()
 
@@ -42,13 +49,22 @@ def overlay(background: np.array, foreground: np.array, foreground_map: np.array
 
     x = max(min(x, w1-w2), w2)
     y = max(min(y, h1-h2), h2)
+    alpha = max(min(alpha, 1), 0)
 
     a = w2 // 2
     b = w2 - a
     c = h2 // 2
     d = h2 - c
 
-    background[x-a:x+b, y-c:y+d][foreground_map] = foreground[foreground_map]
+    if foreground_map is not None:
+        fg = (foreground[foreground_map] * alpha).astype(np.uint8)
+        bg = (background[x-a:x+b, y-c:y+d][foreground_map]
+              * (1-alpha)).astype(np.uint8)
+        background[x-a:x+b, y-c:y+d][foreground_map] = fg + bg
+    else:
+        fg = (foreground * alpha).astype(np.uint8)
+        bg = (background[x-a:x+b, y-c:y+d] * (1-alpha)).astype(np.uint8)
+        background[x-a:x+b, y-c:y+d] = fg + bg
 
     return background
 

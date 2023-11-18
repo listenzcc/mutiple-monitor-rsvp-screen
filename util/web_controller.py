@@ -38,13 +38,12 @@ def _record(subject, experiment):
 
 def _insert_block():
     block = worker.start_new_block()
-    df = gr.Dataframe(
-        value=[(j,) + e[:2] for j, e in enumerate(block)],
+    return gr.Dataframe(
+        value=[(j, e["img_type"], e["img_name"]) for j, e in enumerate(block)],
         headers=['idx', "type", "name"],
         datatype=['number', 'str', 'str'],
         col_count=(3, "fixed"),
     )
-    return df
 
 
 def _rsvp_fps(fps):
