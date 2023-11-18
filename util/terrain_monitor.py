@@ -36,19 +36,46 @@ from .img_tool import overlay, draw_trace
 @singleton
 class Jet(object):
     asset = Asset()
+    fps = 20
 
     def __init__(self):
         pass
 
     def get(self):
-        i = int(self.asset.terrain_gif_jet['i'])
+        i = int(time.time() * self.fps)
+        i %= self.asset.terrain_gif_jet['n']
         mat = self.asset.terrain_gif_jet['mats'][i]
         mat_map = self.asset.terrain_gif_jet['mat_maps'][i]
-        self.asset.terrain_gif_jet['i'] += 1/5
-        if int(self.asset.terrain_gif_jet['i']) >= self.asset.terrain_gif_jet['n']:
-            self.asset.terrain_gif_jet['i'] = 0
-
         return mat, mat_map
+
+
+class Thumbnail(object):
+    k = 10  # The thumbnail lasts how many seconds
+    valid = True
+
+    def __init__(self, dct, x, y):
+        self.name = dct['name']
+        self.mat = dct['mat']
+        self.tic = None
+        self.x = x
+        self.y = y
+        LOGGER.debug(f'Thumbnail is created {self.name}, {x}, {y}')
+
+    def get(self):
+        # Set tic at its first call
+        if self.tic is None:
+            self.tic = time.time()
+            LOGGER.debug(f'Thumbnail is activated {self.name}')
+
+        t = (time.time() - self.tic) / self.k
+
+        alpha = max(1-t, 0)
+
+        if t > 1:
+            self.valid = False
+            LOGGER.debug(f'Thumbnail become invalid {self.name}')
+
+        return self.mat, alpha
 
 
 def get_noise(x, y):
@@ -60,35 +87,62 @@ class TerrainMonitor(object):
     winname = str(CONF.terrain_wnd_name)
     asset = Asset()
     jet = Jet()
+    mb = MessageBox()
     dt = 0.001
     x = 0.5
     y = 0.5
     dx = 0.001  # np.random.randn() / 100
     dy = 0.001  # np.random.randn() / 100
     trace = []
+    thumbnails = []
 
     def __init__(self):
         Thread(target=self.loop, daemon=True).start()
 
-    def update(self):
+    def update_status(self):
+        # Update the position of the jet
         self.x = get_noise(1, time.time()/10)
         self.y = get_noise(2, time.time()/10)
+
+        # Update the trace
         self.trace.append((self.x, self.y))
-        self.trace = self.trace[-500:]
+
+        if len(self.trace) > 5000:
+            self.trace = self.trace[-2500:]
+            LOGGER.warning('Trace exceeded limit (5000), shrink to the half')
+
+        if self.mb.toggle_clear_terrain_trace:
+            self.trace = []
+            self.mb.toggle_clear_terrain_trace = False
+            LOGGER.debug('Unset messageBox toggle_clear_terrain_trace flag')
+
+        # Update the thumbnail
+        if self.mb.rsvp_target_buffer:
+            self.thumbnails.append(
+                Thumbnail(self.mb.rsvp_target_buffer.pop(), self.x, self.y))
+
+        self.thumbnails = [e for e in self.thumbnails if e.valid]
 
     def loop(self):
         cv2.namedWindow(self.winname, cv2.WINDOW_NORMAL)
         cv2.setWindowProperty(self.winname, cv2.WND_PROP_TOPMOST, 1)
 
         while True:
-            self.update()
+            self.update_status()
             cv2.setWindowTitle(self.winname, self.winname)
 
             mat = self.asset.terrain_terrain['mat'].copy()
             mat_jet, mat_jet_map = self.jet.get()
+
             draw_trace(mat, self.trace, copy=False)
+
+            for thumb in self.thumbnails:
+                m, a = thumb.get()
+                overlay(mat, m, None, thumb.x, thumb.y, a, copy=False)
+            # [overlay(mat, e.mat, None, e.x, e.y, e.alpha, copy=False)
+            #  for e in self.thumbnails]
+
             overlay(mat, mat_jet, mat_jet_map, self.x, self.y, copy=False)
-            # mat[100:150, 100:150][mat_jet_map] = mat_jet[mat_jet_map]
 
             cv2.imshow(self.winname, mat)
             cv2.pollKey()

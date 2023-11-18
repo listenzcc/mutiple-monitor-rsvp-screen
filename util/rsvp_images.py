@@ -52,7 +52,9 @@ def _find_images(folder: Path, type: str = 'na'):
 
         image = image.convert(mode='RGB')
         image = image.resize((int(CONF.width), int(CONF.height)))
-        res.append((type, file.name, image))
+        thumbnail = image.resize(
+            (int(CONF.thumbnail_width), int(CONF.thumbnail_height)))
+        res.append((type, file.name, image, thumbnail))
 
         return
 
@@ -124,7 +126,7 @@ class RSVPImages(object):
         df1 = pd.DataFrame(self.targets)
         df2 = pd.DataFrame(self.others)
         self.table = pd.concat([df1, df2])
-        self.table.columns = ['type', 'name', 'imgObject']
+        self.table.columns = ['type', 'name', 'imgObject', 'thumbnail']
         self.table['size'] = self.table['imgObject'].map(lambda img: img.size)
         LOGGER.debug(f'Loaded images for {len(self.table)} images.')
 
@@ -157,9 +159,16 @@ class RSVPImages(object):
         block = []
         for e in type_line:
             obj = self.get_target() if e == 1 else self.get_other()
-            mat = pil2mat(obj[-1])
-            block.append(obj + (mat,))
-        LOGGER.debug(f'Generated block: {[e[:2] for e in block]}')
+            mat = pil2mat(obj[2])
+            block.append(dict(
+                img_type=obj[0],
+                img_name=obj[1],
+                img=obj[2],
+                mat_rgb=mat,
+                thumbnail=obj[3]
+            ))
+        LOGGER.debug(
+            f'Generated block: {[(e["img_type"], e["img_name"]) for e in block]}')
         return block
 
 
