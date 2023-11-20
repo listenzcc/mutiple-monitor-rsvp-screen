@@ -19,17 +19,21 @@ Functions:
 # %% ---- 2023-11-17 ------------------------
 # Requirements and constants
 import cv2
+import time
 import numpy as np
 
+from threading import Thread
 from PIL import Image
 from . import LOGGER, CONF, singleton
 from .img_tool import pil2mat
+from .mapbox_tool import Mapbox
 
 from rich import inspect
 
-
 # %% ---- 2023-11-17 ------------------------
 # Function and class
+
+
 def _read_img(path, resize=True):
     img = Image.open(path)
     img = img.convert(mode='RGB')
@@ -68,9 +72,13 @@ def _read_gif(path):
 class Asset(object):
     root = CONF.root_path
     folder = CONF.root_path.joinpath('asset')
+    mapbox = Mapbox()
+    lon = -180
+    lat = 30
 
     def __init__(self):
         self.load_asset()
+        Thread(target=self._real_time_terrain, daemon=True).start()
 
     def load_asset(self):
         self.image_rsvp_idle = _read_img(self.folder.joinpath('rsvp/idle.png'))
@@ -80,6 +88,14 @@ class Asset(object):
                                          resize=False)
         self.terrain_gif_jet = _read_gif(
             self.folder.joinpath('terrain/jet.gif'))
+
+    def _real_time_terrain(self):
+        while True:
+            # Rolling 1.0 degrees for 1.0 seconds
+            self.lon = (time.time()/1.0 % 360) - 180
+            dct, key = self.mapbox.fetch_img(self.lon, self.lat)
+            self.terrain_terrain = dct
+            LOGGER.debug(f'Updated terrain: {key}')
 
 
 # %% ---- 2023-11-17 ------------------------

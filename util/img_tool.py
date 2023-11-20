@@ -26,6 +26,8 @@ from PIL import Image
 # %% ---- 2023-11-17 ------------------------
 # Function and class
 def pil2mat(img: Image, code=cv2.COLOR_BGR2RGB):
+    if img.mode == 'P':
+        img = img.convert('RGB', palette=img.palette)
     return cv2.cvtColor(np.array(img, dtype=np.uint8), code)
 
 
@@ -91,7 +93,7 @@ def draw_trace(background: np.array, trace: list, copy=True):
         d = h2 - c
 
         # BGR
-        background[x-a:x+b, y-c:y+d] = (0, 255, 255)
+        background[x-a:x+b, y-c:y+d] = (0, 0, 255)
 
     return background
 
