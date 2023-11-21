@@ -29,6 +29,7 @@ from . import LOGGER, CONF, singleton
 from .message_box import MessageBox
 from .load_asset import Asset
 from .img_tool import overlay, draw_trace
+from .patrol_trace import PatrolTrace
 
 
 # %% ---- 2023-11-17 ------------------------
@@ -53,7 +54,10 @@ class Thumbnail(object):
     k = 10  # The thumbnail lasts how many seconds
     valid = True
 
-    def __init__(self, dct, x, y):
+    def __init__(self, dct: dict, x: float, y: float):
+        '''
+        Generate the thumbnail with the image and its position (x, y)
+        '''
         self.name = dct['name']
         self.mat = dct['mat']
         self.tic = None
@@ -88,11 +92,10 @@ class TerrainMonitor(object):
     asset = Asset()
     jet = Jet()
     mb = MessageBox()
+    pt = PatrolTrace()
     dt = 0.001
     x = 0.5
     y = 0.5
-    dx = 0.001  # np.random.randn() / 100
-    dy = 0.001  # np.random.randn() / 100
     trace = []
     thumbnails = []
 
@@ -101,48 +104,50 @@ class TerrainMonitor(object):
 
     def update_status(self):
         # Update the position of the jet
-        self.x = get_noise(1, time.time()/10)
-        self.y = get_noise(2, time.time()/10)
+        xy, left, right = self.pt.get()
+        self.x = xy['x']
+        self.y = xy['y']
 
-        # Update the trace
-        self.trace.append((self.x, self.y))
-
-        if len(self.trace) > 5000:
-            self.trace = self.trace[-2500:]
-            LOGGER.warning('Trace exceeded limit (5000), shrink to the half')
-
+        # Toggle the trace,
+        # It usually means the RSVP block starts
         if self.mb.toggle_clear_terrain_trace:
-            self.trace = []
+            # self.trace = []
+            self.pt.generate_trace()
             self.mb.toggle_clear_terrain_trace = False
             LOGGER.debug('Unset messageBox toggle_clear_terrain_trace flag')
 
         # Update the thumbnail
+        # One-time for one thumbnail
         if self.mb.rsvp_target_buffer:
             self.thumbnails.append(
                 Thumbnail(self.mb.rsvp_target_buffer.pop(), self.x, self.y))
 
         self.thumbnails = [e for e in self.thumbnails if e.valid]
 
+        return left, right
+
     def loop(self):
         cv2.namedWindow(self.winname, cv2.WINDOW_NORMAL)
         cv2.setWindowProperty(self.winname, cv2.WND_PROP_TOPMOST, 1)
 
         while True:
-            self.update_status()
+            left, right = self.update_status()
             cv2.setWindowTitle(self.winname, self.winname)
 
             mat = self.asset.terrain_terrain['mat'].copy()
             mat_jet, mat_jet_map = self.jet.get()
 
-            draw_trace(mat, self.trace, copy=False)
+            # Draw the trace in the tail
+            draw_trace(mat, left, color=(200, 0, 0), copy=False)
+            draw_trace(mat, right, color=(0, 200, 0), copy=False)
 
+            # Draw the thumbnails
             for thumb in self.thumbnails:
                 m, a = thumb.get()
                 overlay(mat, m, None, thumb.x, thumb.y, a, copy=False)
-            # [overlay(mat, e.mat, None, e.x, e.y, e.alpha, copy=False)
-            #  for e in self.thumbnails]
 
-            overlay(mat, mat_jet, mat_jet_map, self.x, self.y, copy=False)
+            # Draw the jet
+            overlay(mat, mat_jet, mat_jet_map, self.x, self.y, 0.9, copy=False)
 
             cv2.imshow(self.winname, mat)
             cv2.pollKey()
