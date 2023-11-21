@@ -18,11 +18,9 @@ Functions:
 
 # %% ---- 2023-11-16 ------------------------
 # Requirements and constants
-import time
-from util import LOGGER
-from util.web_controller import demo
-
+from threading import Thread
 from util.worker import Worker
+from util.web_controller import demo
 
 
 # %% ---- 2023-11-16 ------------------------
@@ -32,8 +30,9 @@ from util.worker import Worker
 # %% ---- 2023-11-16 ------------------------
 # Play ground
 if __name__ == '__main__':
-    demo.launch()
-
+    Thread(target=demo.launch, daemon=True).start()
+    worker = Worker()
+    worker.keep_alive()
     print('Bye')
 
 

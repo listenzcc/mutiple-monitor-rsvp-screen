@@ -19,13 +19,16 @@ Functions:
 # %% ---- 2023-11-16 ------------------------
 # Requirements and constants
 import cv2
+import time
+import keyboard
 
 from threading import Thread
 
-from . import LOGGER, singleton
+from . import LOGGER, CONF, singleton
 from .rsvp_images import RSVPImages
 from .rsvp_monitor import RSVPMonitor
 from .terrain_monitor import TerrainMonitor
+from .message_box import MessageBox
 
 
 # %% ---- 2023-11-16 ------------------------
@@ -36,34 +39,37 @@ class Worker(object):
     rsvp_monitor = RSVPMonitor()
     rsvp_images = RSVPImages()
     terrain_monitor = TerrainMonitor()
-    busy = False
+    mb = MessageBox()
 
     def __init__(self):
         self.rsvp_images.report()
 
     def start_new_block(self):
-        if self.busy:
-            LOGGER.warning('Failed to start new block')
-            return self.block
-
-        # self._running_block()
-
         block = self.rsvp_images.new_block()
         self.rsvp_monitor.blocks.append(block)
-        # Thread(target=self._running_block, args=(block,), daemon=True).start()
-
         return block
 
-    def _running_block(self, block):
-        self.block = block
-        self.busy = True
-        LOGGER.debug('Started running block')
+    def _key_press_callback(self, key):
+        self.mb.on_key_press(key.name)
 
-        self.rsvp_monitor.display_rsvp_block(block)
-        cv2.waitKey(0)
+    def keep_alive(self):
+        Thread(target=self._keep_alive).start()
 
-        self.busy = False
-        LOGGER.debug('Stopped running block')
+    def _keep_alive(self):
+        keyboard.on_press(self._key_press_callback, suppress=True)
+
+        while True:
+            if not self.rsvp_monitor.running:
+                LOGGER.debug('RSVP monitor is not running')
+                break
+
+            if not self.terrain_monitor.running:
+                LOGGER.debug('Terrain monitor is not running')
+                break
+
+            time.sleep(0.1)
+
+        keyboard.unhook_all()
 
 
 # %% ---- 2023-11-16 ------------------------

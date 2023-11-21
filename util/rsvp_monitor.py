@@ -40,6 +40,7 @@ class RSVPMonitor(object):
     asset = Asset()
     blocks = []
     dt = 0.001
+    running = True
 
     def __init__(self):
         Thread(target=self.loop, daemon=True).start()
@@ -54,7 +55,7 @@ class RSVPMonitor(object):
         cv2.setWindowProperty(self.winname, cv2.WND_PROP_TOPMOST, 1)
         cv2.setWindowProperty(self.winname_target, cv2.WND_PROP_TOPMOST, 1)
 
-        while True:
+        while cv2.getWindowProperty(self.winname, cv2.WND_PROP_VISIBLE):
             # Reset titles
             cv2.setWindowTitle(self.winname, self.winname)
             cv2.setWindowTitle(self.winname_target, self.winname_target)
@@ -74,22 +75,20 @@ class RSVPMonitor(object):
                 cv2.waitKey(1000 * CONF.rsvp_between_blocks_secs)
                 self.display_rsvp_block(self.blocks.pop(0))
 
-        cv2.destroyAllWindows()
+        # cv2.destroyAllWindows()
+        self.running = False
+        LOGGER.debug(f'Closed window: {self.winname}')
 
     def display_rsvp_block(self, block):
-        self.mb.internal_message_rsvp_block_starts()
-
+        i = 0
         n = len(block)
-
         dt = self.update_fps()
         next_t = dt
 
-        self.mb.send_parallel_code(CONF.signal_rsvp_block_start)
+        self.mb.on_rsvp_block_starts()
 
         tic = time.time()
-
-        i = 0
-        while i < n:
+        while i < n and cv2.getWindowProperty(self.winname, cv2.WND_PROP_VISIBLE):
             t = time.time() - tic
 
             if (t < next_t):
@@ -104,9 +103,9 @@ class RSVPMonitor(object):
 
             print(f'Image onset: {i} | {t:0.4f} | {mat.shape}')
 
-            # winname | remain blocks | real fps | ideal fps
+            # winname | remain blocks | progress | real fps | ideal fps
             cv2.setWindowTitle(self.winname,
-                               f'{self.winname} | Blocks: {len(self.blocks)} | Fps: {(i+1)/t:0.4f} | {CONF.rsvp_fps}')
+                               f'{self.winname} | Blocks: {len(self.blocks)} | Progress: {i/n:0.2f} | Fps: {(i+1)/t:0.4f} | {CONF.rsvp_fps}')
             cv2.imshow(self.winname, mat)
             cv2.pollKey()
 
@@ -118,16 +117,14 @@ class RSVPMonitor(object):
                 cv2.imshow(self.winname_target, mat)
                 cv2.pollKey()
 
-                self.mb.internal_message_rsvp_target_onset(
+                self.mb.on_rsvp_target_image_onsets(
                     dct['img_name'], dct['thumbnail'])
-
-                self.mb.send_parallel_code(CONF.signal_target_onset)
             else:
-                self.mb.send_parallel_code(CONF.signal_other_onset)
+                self.mb.on_rsvp_other_image_onsets()
 
             i += 1
 
-        self.mb.send_parallel_code(CONF.signal_rsvp_block_stop)
+        self.mb.on_rsvp_block_stops()
 
         toc = time.time()
         t = toc-tic

@@ -31,7 +31,7 @@ from threading import Thread
 
 from rich import print, inspect
 
-from . import LOGGER, CONF
+from . import LOGGER, CONF, singleton
 from .img_tool import pil2mat
 
 # %% ---- 2023-11-16 ------------------------
@@ -102,6 +102,7 @@ def _mk_rsvp_block_design():
     return res
 
 
+@singleton
 class RSVPImages(object):
     def __init__(self):
         self.load()
