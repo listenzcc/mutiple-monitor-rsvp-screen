@@ -34,19 +34,20 @@ from rich import inspect
 # Function and class
 
 
-def _read_img(path, resize=True):
+def _read_img(path, new_size: tuple = None, name: str = 'na'):
     img = Image.open(path)
     img = img.convert(mode='RGB')
 
-    if resize:
-        img = img.resize((int(CONF.width), int(CONF.height)))
+    if new_size is not None:
+        # img = img.resize((int(CONF.width), int(CONF.height)))
+        img = img.resize(new_size)
         LOGGER.debug(f'Resized the image: {path}')
     else:
         LOGGER.debug(f'Not resized the image: {path}')
 
     LOGGER.debug(f'Loaded image: {path}')
 
-    return dict(img=img, mat=pil2mat(img))
+    return dict(name=name, img=img, mat=pil2mat(img))
 
 
 def _read_gif(path):
@@ -58,7 +59,8 @@ def _read_gif(path):
         gif.seek(j)
         img = gif.convert(mode=gif.mode)  # 'RGB')
         img = img.resize((50, 50))
-        mat = pil2mat(img)
+        # Rotate the image to fit the forward direction
+        mat = pil2mat(img).transpose((1, 0, 2))[::-1]
         mat_map = np.sum(mat, axis=2) > 0
         mats.append(mat)
         mat_maps.append(mat_map)
@@ -81,13 +83,21 @@ class Asset(object):
         Thread(target=self._real_time_terrain, daemon=True).start()
 
     def load_asset(self):
-        self.image_rsvp_idle = _read_img(self.folder.joinpath('rsvp/idle.png'))
-        self.image_rsvp_between_blocks = _read_img(
-            self.folder.joinpath('rsvp/between-blocks.png'))
-        self.terrain_terrain = _read_img(self.folder.joinpath('terrain/terrain.png'),
-                                         resize=False)
+        rsvp_size = (int(CONF.width), int(CONF.height))
+        self.image_rsvp_idle = _read_img(
+            self.folder.joinpath('rsvp/idle.png'), new_size=rsvp_size)
+
+        self.image_rsvp_between_blocks = _read_img(self.folder.joinpath('rsvp/between-blocks.png'),
+                                                   new_size=rsvp_size)
+
+        self.terrain_terrain = _read_img(
+            self.folder.joinpath('terrain/terrain.png'))
+
         self.terrain_gif_jet = _read_gif(
             self.folder.joinpath('terrain/jet.gif'))
+
+        self.terrain_bomb = _read_img(
+            self.folder.joinpath('terrain/bomb.png'), name='bomb', new_size=(50, 50))
 
     def _real_time_terrain(self):
         while True:

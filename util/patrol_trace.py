@@ -20,6 +20,7 @@ Functions:
 # Requirements and constants
 import time
 import bezier
+import random
 import numpy as np
 
 from . import CONF, LOGGER, singleton
@@ -30,6 +31,7 @@ from . import CONF, LOGGER, singleton
 @singleton
 class PatrolTrace(object):
     total_secs = CONF.patrol_total_secs
+    total_bombs = CONF.patrol_total_bombs
     total_pnts = CONF.patrol_total_pnts
     degree = 1
 
@@ -82,9 +84,11 @@ class PatrolTrace(object):
         # If nodes is not provided, use random values in (0, 1)
         if tic is None:
             tic = time.time()
+
         if nodes is None:
             nodes = np.asfortranarray(np.random.rand(2, 10))
             LOGGER.warning('Generated random nodes')
+
         curve = bezier.Curve(nodes, degree=nodes.shape[1]-1)
         s_vals = np.linspace(0, 1, self.total_pnts)
         # Convert 2 x n array into n x 2 array, n=self.total_pnts
@@ -93,11 +97,17 @@ class PatrolTrace(object):
         # t: When the point is visited;
         # x, y: Where the point is visited.
         check_points = [
-            dict(t=tic+v * self.total_secs, x=pnt[0], y=pnt[1])
+            dict(t=tic+v * self.total_secs, x=pnt[0], y=pnt[1], visited=False)
             for v, pnt in zip(s_vals, pnts)
         ]
+
+        select = random.choices(check_points, k=int(self.total_bombs))
+        for e in select:
+            e['is_bomb'] = True
+
         self.check_points = check_points
-        LOGGER.debug('Generated check_points.')
+        LOGGER.debug('Generated check_points')
+
         return check_points
 
 

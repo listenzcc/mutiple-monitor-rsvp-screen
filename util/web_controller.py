@@ -71,7 +71,7 @@ with gr.Blocks() as demo:
     rsvp_fps_slider.input(_rsvp_fps, inputs=rsvp_fps_slider)
 
 
-demo.launch()
+# demo.launch()
 
 # %% ---- 2023-11-16 ------------------------
 # Pending

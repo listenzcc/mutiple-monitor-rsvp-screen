@@ -7,7 +7,7 @@
   "thumbnail_width": 50,
   "thumbnail_height": 50,
   "rsvp_fps": 10,
-  "rsvp_block_total_images": 1000,
+  "rsvp_block_total_images": 500,
   "rsvp_block_targets": 80,
   "rsvp_block_targets_min_gap": 5,
   "rsvp_between_blocks_secs": 2,
@@ -16,10 +16,12 @@
   "terrain_wnd_name": "Terrain",
   "patrol_total_secs": 30,
   "patrol_total_pnts": 1000,
-  "signal_rsvp_block_start": 16,
-  "signal_rsvp_block_stop": 32,
-  "signal_target_onset": 2,
-  "signal_other_onset": 4,
-  "signal_subject_keydown": 8,
-  "parallel_port": 8848
+  "patrol_total_bombs": 20,
+  "code_rsvp_block_start": 16,
+  "code_rsvp_block_stop": 32,
+  "code_target_onset": 2,
+  "code_other_onset": 4,
+  "code_subject_keypress": 8,
+  "code_bomb": 64,
+  "parallel_port": "8848"
 }
