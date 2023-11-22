@@ -20,6 +20,7 @@ Functions:
 # Requirements and constants
 import cv2
 import time
+import contextlib
 import numpy as np
 
 from threading import Thread
@@ -103,9 +104,10 @@ class Asset(object):
         while True:
             # Rolling 1.0 degrees for 1.0 seconds
             self.lon = (time.time()/1.0 % 360) - 180
-            dct, key = self.mapbox.fetch_img(self.lon, self.lat)
-            self.terrain_terrain = dct
-            LOGGER.debug(f'Updated terrain: {key}')
+            with contextlib.suppress(Exception):
+                dct, key = self.mapbox.fetch_img(self.lon, self.lat)
+                self.terrain_terrain = dct
+                LOGGER.debug(f'Updated terrain: {key}')
 
 
 # %% ---- 2023-11-17 ------------------------

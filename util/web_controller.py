@@ -37,7 +37,7 @@ def _record(subject, experiment):
 
 
 def _insert_block():
-    block = worker.start_new_block()
+    block = worker.insert_rsvp_block()
     return gr.Dataframe(
         value=[(j, e["img_type"], e["img_name"]) for j, e in enumerate(block)],
         headers=['idx', "type", "name"],

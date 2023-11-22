@@ -36,7 +36,7 @@ def mk_box(lon, lat):
 def fetch_png(lon, lat, img_width, img_height, access_token):
     box = f'{mk_box(lon, lat)}'
     size = f'{img_width:d}x{img_height:d}'
-    url = f'https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/{box}/{size}?access_token={access_token}'
+    url = f'https://wrong.api.mapbox.com/styles/v1/mapbox/streets-v12/static/{box}/{size}?access_token={access_token}'
     resp = requests.get(url)
     # print(url, resp)
     io = BytesIO(resp.content)
