@@ -1,0 +1,14 @@
+bezier==2023.7.28
+gradio==4.5.0
+keyboard==0.13.5
+loguru==0.7.0
+numpy==1.25.2
+omegaconf==2.3.0
+opencv_python==4.8.0.76
+opensimplex==0.4.5
+pandas==1.5.3
+Pillow==10.1.0
+plotly==5.10.0
+Requests==2.31.0
+rich==13.7.0
+tqdm==4.66.1
