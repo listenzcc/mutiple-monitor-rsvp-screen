@@ -68,16 +68,40 @@ class RSVPMonitor(object):
 
             # There are RSVP blocks
             while self.blocks:
-                cv2.imshow(
-                    self.winname, self.asset.image_rsvp_between_blocks['mat'])
-                cv2.imshow(self.winname_target,
-                           self.asset.image_rsvp_between_blocks['mat'])
-                cv2.waitKey(1000 * CONF.rsvp_between_blocks_secs)
+                # cv2.imshow(
+                #     self.winname, self.asset.image_rsvp_between_blocks['mat'])
+                # cv2.imshow(self.winname_target,
+                #            self.asset.image_rsvp_between_blocks['mat'])
+                # cv2.waitKey(1000 * CONF.rsvp_between_blocks_secs)
+                self.display_between_rsvp_blocks()
                 self.display_rsvp_block(self.blocks.pop(0))
 
         # cv2.destroyAllWindows()
         self.running = False
         LOGGER.debug(f'Closed window: {self.winname}')
+
+    def display_between_rsvp_blocks(self):
+        total = int(CONF.rsvp_between_blocks_secs)
+
+        tic = time.time()
+        t = 0
+        while t < total and cv2.getWindowProperty(self.winname, cv2.WND_PROP_VISIBLE):
+            dt = self.update_fps()
+
+            # winname | remain blocks | progress
+            cv2.setWindowTitle(self.winname,
+                               f'{self.winname} | Blocks: {len(self.blocks)} | Progress: {t/total:0.2f}')
+
+            cv2.imshow(
+                self.winname, self.asset.image_rsvp_between_blocks['mat'])
+            cv2.imshow(self.winname_target,
+                       self.asset.image_rsvp_between_blocks['mat'])
+            cv2.pollKey()
+
+            time.sleep(dt)
+            t = time.time() - tic
+
+        LOGGER.debug(f'Finished between rsvp blocks, it lasts {t-tic} seconds')
 
     def display_rsvp_block(self, block):
         i = 0
