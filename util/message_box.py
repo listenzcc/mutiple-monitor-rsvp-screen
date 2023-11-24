@@ -25,7 +25,6 @@ from threading import Thread
 
 from . import LOGGER, CONF, singleton
 from .img_tool import pil2mat
-from .parallel.parallel import Parallel
 
 
 # %% ---- 2023-11-16 ------------------------
@@ -44,12 +43,16 @@ code = dict(
 class MessageBox(object):
     trigger_rsvp_block_starts = False
     trigger_rsvp_block_stops = False
-    parallel = Parallel(CONF.parallel_port)
+    parallel = None
     rsvp_target_buffer = []
     rsvp_block_record = []
 
     def __init__(self):
-        pass
+        try:
+            from .parallel.parallel import Parallel
+            self.parallel = Parallel(CONF.parallel_port)
+        except Exception as err:
+            LOGGER.error(f'Failed to access parallel device: {err}')
 
     def _record_event(self, dct: dict, clear: bool = False):
         if clear:
@@ -97,6 +100,9 @@ class MessageBox(object):
             f'RSVP target ({name}) onset, buffer size: {len(self.rsvp_target_buffer)}')
 
     def _send_parallel_code(self, code: int):
+        if self.parallel is None:
+            LOGGER.warning(f'Failed to send code to parallel port: {code}')
+            return
         self.parallel.send(code)
         LOGGER.debug(f'Sent code to parallel port: {code}')
 
