@@ -32,7 +32,7 @@ from util.web_controller import demo
 if __name__ == '__main__':
     Thread(target=demo.launch, daemon=True).start()
     worker = Worker()
-    worker.keep_alive()
+    worker.run_forever()
     print('Bye')
 
 

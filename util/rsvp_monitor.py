@@ -52,8 +52,8 @@ class RSVPMonitor(object):
     def loop(self):
         cv2.namedWindow(self.winname, cv2.WINDOW_NORMAL)
         cv2.namedWindow(self.winname_target, cv2.WINDOW_NORMAL)
-        cv2.setWindowProperty(self.winname, cv2.WND_PROP_TOPMOST, 1)
         cv2.setWindowProperty(self.winname_target, cv2.WND_PROP_TOPMOST, 1)
+        cv2.setWindowProperty(self.winname, cv2.WND_PROP_TOPMOST, 1)
 
         while cv2.getWindowProperty(self.winname, cv2.WND_PROP_VISIBLE):
             # Reset titles
@@ -68,13 +68,10 @@ class RSVPMonitor(object):
 
             # There are RSVP blocks
             while self.blocks:
-                # cv2.imshow(
-                #     self.winname, self.asset.image_rsvp_between_blocks['mat'])
-                # cv2.imshow(self.winname_target,
-                #            self.asset.image_rsvp_between_blocks['mat'])
-                # cv2.waitKey(1000 * CONF.rsvp_between_blocks_secs)
                 self.display_between_rsvp_blocks()
-                self.display_rsvp_block(self.blocks.pop(0))
+                # Incase the self.blocks is cleared
+                if self.blocks:
+                    self.display_rsvp_block(self.blocks.pop(0))
 
         # cv2.destroyAllWindows()
         self.running = False

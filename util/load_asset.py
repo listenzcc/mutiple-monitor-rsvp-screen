@@ -40,7 +40,6 @@ def _read_img(path, new_size: tuple = None, name: str = 'na'):
     img = img.convert(mode='RGB')
 
     if new_size is not None:
-        # img = img.resize((int(CONF.width), int(CONF.height)))
         img = img.resize(new_size)
         LOGGER.debug(f'Resized the image: {path}')
     else:

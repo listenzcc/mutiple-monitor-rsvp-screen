@@ -72,8 +72,8 @@ class Worker(object):
         # inspect(key, all=True)
         print(name)
 
-    def keep_alive(self):
-        Thread(target=self._keep_alive).start()
+    def run_forever(self):
+        self._keep_alive()
 
     def _keep_alive(self):
         """
@@ -96,20 +96,27 @@ class Worker(object):
             >>> worker._keep_alive()
         """
 
-        keyboard.on_press(self._key_press_callback, suppress=True)
+        @contextlib.contextmanager
+        def _safe_hook_key_press():
+            try:
+                keyboard.on_press(self._key_press_callback, suppress=True)
+                LOGGER.debug('Suppressed key-press')
+                yield True
+            finally:
+                keyboard.unhook_all()
+                LOGGER.debug('Released key-press')
 
-        while True:
-            if not self.rsvp_monitor.running:
-                LOGGER.debug('RSVP monitor is not running')
-                break
+        with _safe_hook_key_press():
+            while True:
+                if not self.rsvp_monitor.running:
+                    LOGGER.debug('RSVP monitor is not running')
+                    break
 
-            if not self.terrain_monitor.running:
-                LOGGER.debug('Terrain monitor is not running')
-                break
+                if not self.terrain_monitor.running:
+                    LOGGER.debug('Terrain monitor is not running')
+                    break
 
-            time.sleep(0.1)
-
-        keyboard.unhook_all()
+                time.sleep(0.1)
 
 
 # %% ---- 2023-11-16 ------------------------

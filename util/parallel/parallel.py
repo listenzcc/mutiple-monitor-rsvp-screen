@@ -23,9 +23,9 @@ class Parallel(object):
             print('Send failed since the Parallel is not set')
             return
 
-        t = threading.Thread(target=self._send, args=(value, verbose))
-        t.setDaemon(True)
-        t.start()
+        threading.Thread(target=self._send,
+                         args=(value, verbose),
+                         daemon=True).start()
 
         return time.time()
 

@@ -19,10 +19,11 @@ Functions:
 # %% ---- 2023-11-21 ------------------------
 # Requirements and constants
 import time
-import bezier
+# import bezier
 import random
 import numpy as np
 
+from .bazier import Bezier
 from . import CONF, LOGGER, singleton
 
 
@@ -86,13 +87,14 @@ class PatrolTrace(object):
             tic = time.time()
 
         if nodes is None:
-            nodes = np.asfortranarray(np.random.rand(2, 10))
+            # nodes = np.asfortranarray(np.random.rand(2, 10))
+            nodes = np.array(np.random.rand(10, 2))  # 2, 10))
             LOGGER.warning('Generated random nodes')
 
-        curve = bezier.Curve(nodes, degree=nodes.shape[1]-1)
         s_vals = np.linspace(0, 1, self.total_pnts)
+        pnts = Bezier.Curve(s_vals, nodes)
         # Convert 2 x n array into n x 2 array, n=self.total_pnts
-        pnts = curve.evaluate_multi(s_vals).transpose()
+        # pnts = curve.evaluate_multi(s_vals).transpose()
         # The check_point is dict,
         # t: When the point is visited;
         # x, y: Where the point is visited.
