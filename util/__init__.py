@@ -18,6 +18,7 @@ Functions:
 
 # %% ---- 2023-11-16 ------------------------
 # Requirements and constants
+import sys
 from loguru import logger
 
 from pathlib import Path
@@ -30,6 +31,7 @@ from dataclasses import dataclass
 # %% ---- 2023-11-16 ------------------------
 # Function and class
 root = Path(__file__).parent.parent
+root = Path(sys.argv[0]).parent
 
 
 @dataclass

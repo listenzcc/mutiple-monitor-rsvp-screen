@@ -3,3 +3,6 @@ ignore
 __pycache__
 latest.yaml
 block_records
+build
+dist
+main.exe

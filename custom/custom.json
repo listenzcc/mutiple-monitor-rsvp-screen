@@ -16,7 +16,7 @@
   "terrain_wnd_name": "Terrain",
   "patrol_total_secs": 30,
   "patrol_total_pnts": 1000,
-  "patrol_total_bombs": 20,
+  "patrol_total_bombs": 50,
   "code_rsvp_block_start": 16,
   "code_rsvp_block_stop": 32,
   "code_target_onset": 2,
