@@ -100,7 +100,9 @@ class Asset(object):
             self.folder.joinpath('terrain/bomb.png'), name='bomb', new_size=(50, 50))
 
     def _real_time_terrain(self):
-        while True:
+        # ! Only works when the mapbox is valid
+        LOGGER.debug('Mapbox starts.')
+        while self.mapbox.valid:
             # Rolling 1.0 degrees for 1.0 seconds
             self.lon = (time.time()/1.0 % 360) - 180
             with contextlib.suppress(Exception):
@@ -110,6 +112,7 @@ class Asset(object):
 
             # ! Add some gap, to make sure it will not crush the system in a doing-nothing-loop
             time.sleep(0.1)
+        LOGGER.debug('Mapbox stopped.')
 
 
 # %% ---- 2023-11-17 ------------------------

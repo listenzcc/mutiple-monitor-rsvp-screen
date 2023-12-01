@@ -39,7 +39,8 @@ def fetch_png(lon, lat, img_width, img_height, access_token=None):
     assert access_token is not None, "Invalid access_token"
     box = f'{mk_box(lon, lat)}'
     size = f'{img_width:d}x{img_height:d}'
-    url = f'https://wrong.api.mapbox.com/styles/v1/mapbox/streets-v12/static/{box}/{size}?access_token={access_token}'
+    url = f'https://wrong.api.mapbox.com/styles/v1/mapbox/streets-v12/static/{
+        box}/{size}?access_token={access_token}'
     resp = requests.get(url)
     # print(url, resp)
     io = BytesIO(resp.content)
@@ -51,11 +52,13 @@ def fetch_png(lon, lat, img_width, img_height, access_token=None):
 @singleton
 class Mapbox(object):
     buffer = {}
+    valid = False
 
     def __init__(self):
         with contextlib.suppress(Exception):
             self.access_token = open(
                 'C:\\Users\\zcc\\OneDrive\\SafeBox\\.mapbox_token').read()
+            self.valid = True
 
     def fetch_img(self, lon, lat, img_width=1000, img_height=1000):
         box = f'{mk_box(lon, lat)}'
