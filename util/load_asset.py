@@ -108,6 +108,9 @@ class Asset(object):
                 self.terrain_terrain = dct
                 LOGGER.debug(f'Updated terrain: {key}')
 
+            # ! Add some gap, to make sure it will not crush the system in a doing-nothing-loop
+            time.sleep(0.1)
+
 
 # %% ---- 2023-11-17 ------------------------
 # Play ground
